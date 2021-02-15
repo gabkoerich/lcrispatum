@@ -1,8 +1,7 @@
 #### Lithothamnion crispatum model ----
 
-
 #### setup environment ----
-setwd("C:/Users/gabri/Google Drive/Mestrado/crispatum/biomod2")
+setwd() #folder
 
 ## load the required packages
 library(biomod2)
@@ -12,6 +11,7 @@ library(raster)
 library(rasterVis)
 library(dplyr)
 library(reshape2)
+library(usdm)
 
 #### read data ----
 # Occurrence data
@@ -19,7 +19,7 @@ occ <- read.csv("envfilter_lcrispatum_pa.csv")
 summary(occ)
 
 # Environmental data
-setwd("C:/Users/gabri/Google Drive/Scripts/biooracle")
+setwd() #folder with the layers
 envdata = Sys.glob("*.tif") #Or whatever identifies your files
 stck = raster::stack() #empty stack for raster
 e <- raster::extent(-80, -20, -40, 10)  #for world usually crop (-180, 180, -90, 90)
@@ -29,9 +29,13 @@ for(i in 1:NROW(envdata)){
   stck = raster::stack(stck, cp_tempraster)
 }
 names(stck)
+#drop unwanted layers
 envpred <- dropLayer(stck, c(1,3,5,7))
 #envpred <- stck
 names(envpred)
+
+v1 <- vifstep(envpred, th = 12)
+v1
 
 #------------------------------------------------------------
 #### Formating the data ----
@@ -223,7 +227,7 @@ ensemble_models_proj_current <-
 ## load 2100 variables - RCP 2.6
 # Has to be in the same name as variables used for model construction
 # For the variables not available in the future, using the current conditions
-setwd("C:/Users/gabri/Google Drive/Scripts/2100_RCP26_bdmin")
+setwd() #folder with the layers
 envdata = Sys.glob("*.tif") #Or whatever identifies your files
 rcp26 = raster::stack() #empty stack for raster
 e <- raster::extent(-80, -20, -40, 10)  #for world usually crop (-180, 180, -90, 90)
@@ -234,7 +238,7 @@ for(i in 1:NROW(envdata)){
 }
 names(rcp26)
 
-setwd("C:/Users/gabri/Google Drive/Mestrado/crispatum/biomod2")
+setwd() #folder with the layers
 models_proj_2100_rcp26 <- 
   BIOMOD_Projection(
     modeling.output = models,
@@ -255,7 +259,7 @@ ensemble_models_proj_2100_rcp26 <-
   )
 
 ## load 2100 variables - RCP 8.5
-setwd("C:/Users/gabri/Google Drive/Scripts/2100_RCP85_bdmin")
+setwd() #folder with the layers
 envdata = Sys.glob("*.tif") #Or whatever identifies your files
 rcp85 = raster::stack() #empty stack for raster
 e <- raster::extent(-80, -20, -40, 10)  #for world usually crop (-180, 180, -90, 90)
@@ -266,7 +270,7 @@ for(i in 1:NROW(envdata)){
 }
 names(rcp85)
 
-setwd("C:/Users/gabri/Google Drive/Mestrado/crispatum/biomod2")
+setwd() #folder with the layers
 
 models_proj_2100_rcp85 <- 
   BIOMOD_Projection(
@@ -328,6 +332,8 @@ SRC_current_2100_rcp85 <-
     bin_proj_current,
     bin_proj_2100_rcp85
   )
+
+SRC_current_2100_rcp85$Compt.By.Models
 
 #raster of committed average
 R85 <- SRC_current_2100_rcp85[["Diff.By.Pixel"]]@layers[[1]]
@@ -449,6 +455,8 @@ ras.cv = raster("lcrispatum/proj_current_bat/individual_projections/lcrispatum_E
 ras.cv.pts = rasterToPoints(ras.cv)
 
 writeRaster(ras.cv, filename="cv_lcrispatum.tif", overwrite = T)
+
+
 
 
 
